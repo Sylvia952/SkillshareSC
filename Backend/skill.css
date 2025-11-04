@@ -1,0 +1,28 @@
+/* Limiter la zone de l'application à la taille d'un téléphone */
+#root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Optionnel: pour centrer sur grand écran */
+  min-height: 100vh; 
+}
+
+.app-container {
+  /* Définit la largeur maximale pour simuler un téléphone */
+  max-width: 450px; 
+  /* Définit la hauteur à l'écran visible */
+  height: 100vh; 
+  /* Déborde si la hauteur est inférieure à une taille minimale */
+  min-height: 600px; 
+  width: 100%;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Pour l'effet "téléphone" sur PC */
+  overflow: hidden; /* Empêche le scroll principal */
+}
+
+/* Le corps de la page doit toujours remplir l'écran */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* Très important pour le défilement vertical unique */
+}
