@@ -1,7 +1,7 @@
 <?php
 // vidlist.php - Le script qui alimente le flux vidéo pour SkillShareSC
 
-require 'db_config.php'; 
+require 'config.php'; 
 // Assurez-vous que le chemin vers db_config.php est correct
 
 header('Content-Type: application/json');

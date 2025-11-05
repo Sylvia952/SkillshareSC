@@ -1,7 +1,7 @@
 <?php
 // profil.php - Récupère les détails d'un utilisateur
 
-require 'db_config.php'; 
+require 'config.php'; 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); 
 

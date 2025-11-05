@@ -2,7 +2,7 @@
 // login.php
 
 // Inclure la configuration de la base de données
-require 'db_config.php'; 
+require 'config.php'; 
 
 // Définir le header pour les réponses JSON (API RESTful)
 header('Content-Type: application/json');

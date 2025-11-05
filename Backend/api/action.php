@@ -1,7 +1,7 @@
 <?php
 // action.php - Gère les likes et les commentaires
 
-require 'db_config.php'; 
+require 'config.php'; 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); 
 

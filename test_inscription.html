@@ -1,0 +1,44 @@
+<script>
+        // URL de votre API PHP (CORRIGÉ : nom de l'API et dossier)
+        // Vérifiez la casse de 'SkillshareSC' si elle est différente chez vous.
+        const API_URL = 'http://localhost/SkillshareSC/backend/api/inscription.php'; 
+
+        function sendRegistrationData() {
+            // Création de l'objet FormData, qui simule un envoi de formulaire HTML
+            // Ceci est le format que PHP lit le plus facilement dans $_POST
+            const formData = new FormData();
+            
+            // Les données à envoyer (UTILISEZ UN NOUVEL EMAIL UNIQUE A CHAQUE FOIS !)
+            formData.append("matricule_number", "20230005");
+            formData.append("last_name", "Curie");
+            formData.append("first_name", "Marie");
+            formData.append("filiere", "Physique");
+            formData.append("email", "marie.curie@univ.com"); 
+            formData.append("password", "Science88");
+            formData.append("username", "MarieP");
+
+            document.getElementById('responseOutput').textContent = 'Envoi en cours...';
+
+            fetch(API_URL, {
+                method: 'POST',
+                // CRITIQUE : on n'envoie PAS de header Content-Type ici.
+                // Le navigateur le gère automatiquement pour FormData.
+                body: formData 
+            })
+            // Le reste du code est bon : il lit la réponse JSON
+            .then(response => response.json().then(data => ({
+                status: response.status,
+                body: data
+            })))
+            .then(result => {
+                const output = document.getElementById('responseOutput');
+                
+                output.innerHTML = `Statut HTTP: ${result.status}\n\n`;
+                output.innerHTML += `Réponse JSON:\n${JSON.stringify(result.body, null, 2)}`;
+            })
+            .catch(error => {
+                const output = document.getElementById('responseOutput');
+                output.innerHTML = `Erreur de connexion : ${error.message}. Vérifiez l'URL de l'API ou XAMPP.`;
+            });
+        }
+    </script>

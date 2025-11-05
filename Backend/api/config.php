@@ -5,7 +5,7 @@
 // 1. PARAMÈTRES DE CONNEXION MySQL (XAMPP par défaut)
 // ---------------------------------------------------------------------
 $host = 'localhost';
-$db_name = 'skillshare'; // 🎯 Nom de la base de données à créer
+$db_name = 'skillshare_db'; // 🎯 Nom de la base de données à créer
 $username = 'root';        // Utilisateur par défaut de XAMPP
 $password = '';            // Mot de passe par défaut de XAMPP
 
