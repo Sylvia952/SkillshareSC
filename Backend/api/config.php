@@ -1,30 +1,32 @@
 <?php
-// db_config.php
+// config.php - Configuration de la connexion à la base de données SkillShareSC
 
 // ---------------------------------------------------------------------
 // 1. PARAMÈTRES DE CONNEXION MySQL (XAMPP par défaut)
 // ---------------------------------------------------------------------
 $host = 'localhost';
-$db_name = 'skillshare_db'; // 🎯 Nom de la base de données à créer
-$username = 'root';        // Utilisateur par défaut de XAMPP
-$password = '';            // Mot de passe par défaut de XAMPP
+$db_name = 'skillshare_db'; // ✅ Le nom est maintenant correct !
+$username = 'root';        
+$password = '';            
 
 // ---------------------------------------------------------------------
-// 2. TENTATIVE DE CONNEXION
+// 2. TENTATIVE DE CONNEXION (avec gestion d'erreur)
 // ---------------------------------------------------------------------
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8", $username, $password);
-    
-    // Configurer PDO pour lancer des exceptions en cas d'erreur
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
+    // Utilisation de utf8mb4 pour une meilleure compatibilité des caractères
+    $pdo = new PDO("mysql:host=$host;dbname=$db_name;charset=utf8mb4", $username, $password);
+    
+    // Configurer PDO pour lancer des exceptions en cas d'erreur (critique pour le debug)
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
 } catch (PDOException $e) {
-    // Si la connexion échoue, afficher une erreur et arrêter l'exécution
-    http_response_code(500); // Erreur de serveur
-    die(json_encode([
-        'success' => false,
-        'message' => "Erreur de connexion à la base de données : " . $e->getMessage()
-    ]));
+    // Si la connexion échoue, renvoyer une réponse JSON (pour le frontend) et arrêter l'exécution
+    http_response_code(500); 
+    die(json_encode([
+        'success' => false,
+        'message' => "Erreur de connexion à la base de données : " . $e->getMessage()
+    ]));
 }
 
-// L'objet $pdo est maintenant prêt à être utilisé pour toutes les requêtes SQL.
+// L'objet $pdo est maintenant prêt à être utilisé par tous les scripts API.
+?>
