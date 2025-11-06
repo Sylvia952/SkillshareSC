@@ -25,10 +25,10 @@ if (session_status() === PHP_SESSION_NONE) {
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a href="index.php" class="nav-link text-light">Accueil</a></li>
         <li class="nav-item"><a href="education.php" class="nav-link text-light">Éducation</a></li>
-        <li class="nav-item"><a href="lives.php" class="nav-link text-light">Lives</a></li>
-
+        
         <?php if(isset($_SESSION['user_id'])): ?>
-            <li class="nav-item"><a href="upload.php" class="nav-link text-light">Publier</a></li>
+          <li class="nav-item"><a href="upload.php" class="nav-link text-light">Publier</a></li>
+          <li class="nav-item"><a href="lives.php" class="nav-link text-light">Lives</a></li>
             <li class="nav-item"><a href="profile.php" class="nav-link text-light">Profil</a></li>
             <li class="nav-item"><a href="logout.php" class="nav-link text-light">Déconnexion</a></li>
         <?php else: ?>
