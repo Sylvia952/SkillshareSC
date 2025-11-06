@@ -86,7 +86,7 @@ $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .video-actions button {
-            background: rgb(89, 89, 243);
+            background: rgba(34, 34, 226, 1);
             border: none;
             border-radius: 50%;
             width: 50px;
