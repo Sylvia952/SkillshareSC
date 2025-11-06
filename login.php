@@ -1,12 +1,10 @@
 <?php
 include 'config.php';
 
-// Démarrer la session si ce n'est pas déjà fait
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Si le formulaire est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $mdp = trim($_POST['mdp']);
@@ -18,9 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($mdp, $user['mdp'])) {
-            // Définir les sessions
             $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_name'] = $user['last_name']; // correspond à ta table
+            $_SESSION['user_name'] = $user['last_name']; 
             header("Location: index.php");
             exit;
         } else {
@@ -32,7 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php include 'includes/header.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+</head>
+<body>
+  <?php include 'includes/header.php'; ?>
 
 <div class="row justify-content-center">
   <div class="col-md-5">
@@ -67,3 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php include 'includes/footer.php'; ?>
+
+</body>
+</html>

@@ -19,7 +19,15 @@ $stmt->execute(['id' => $user_id]);
 $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<?php include 'includes/header.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+</head>
+<body>
+  <?php include 'includes/header.php'; ?>
 
 <div class="container py-5">
   <div class="row justify-content-center">
@@ -28,7 +36,7 @@ $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="card-body text-center">
           <img src="<?= !empty($user['photo']) ? $user['photo'] : 'assets/img/default-avatar.png' ?>" 
                alt="Photo de profil" class="rounded-circle mb-3" width="120" height="120">
-          <h3 class="fw-bold text-primary"><?= htmlspecialchars($user['nom']) ?></h3>
+          <h3 class="fw-bold text-primary"><?= htmlspecialchars($user['last_name']) ?></h3>
           <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
           <a href="logout.php" class="btn btn-danger btn-sm">Se déconnecter</a>
         </div>
@@ -66,3 +74,6 @@ $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <?php include 'includes/footer.php'; ?>
+
+</body>
+</html>

@@ -1,7 +1,6 @@
 <?php
 include 'config.php';
 
-// Si le formulaire est soumis
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nom = trim($_POST['last_name']);
     $email = trim($_POST['email']);
@@ -10,13 +9,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!empty($nom) && !empty($email) && !empty($mdp) && !empty($confirm)) {
         if ($mdp === $confirm) {
-            // Vérifier si l'email existe déjà
             $check = $pdo->prepare("SELECT * FROM users WHERE email = :email");
             $check->execute(['email' => $email]);
             if ($check->rowCount() > 0) {
                 $error = "Cet e-mail est déjà utilisé.";
             } else {
-                // Insérer l’utilisateur
                 $hashed = password_hash($mdp, PASSWORD_DEFAULT);
                 $insert = $pdo->prepare("INSERT INTO users (last_name, email, mdp) VALUES (:last_name, :email, :mdp)");
                 $insert->execute(['last_name' => $nom, 'email' => $email, 'mdp' => $hashed]);
@@ -31,7 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<?php include 'includes/header.php'; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Régister</title>
+</head>
+<body>
+  <?php include 'includes/header.php'; ?>
 
 <div class="row justify-content-center">
   <div class="col-md-6">
@@ -79,3 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php include 'includes/footer.php'; ?>
+
+</body>
+</html>

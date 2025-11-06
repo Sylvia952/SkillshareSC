@@ -7,7 +7,15 @@ $stmt = $pdo->query("SELECT * FROM education ORDER BY date_publication DESC");
 $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<div class="container py-5">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Education</title>
+</head>
+<body>
+  <div class="container py-5">
   <div class="text-center mb-5">
     <h1 class="fw-bold text-primary">🧠 Éducation sexuelle & sociale</h1>
     <p class="text-secondary">Informez-vous, apprenez et partagez des connaissances pour un campus plus conscient et responsable.</p>
@@ -37,3 +45,6 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <?php include 'includes/footer.php'; ?>
+
+</body>
+</html>

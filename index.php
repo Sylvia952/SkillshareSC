@@ -1,16 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php
+include 'config.php';
+include 'includes/header.php';
 
+// Récupérer toutes les vidéos avec le pseudo utilisateur
+$stmt = $pdo->query("
+    SELECT v.*, u.last_name AS pseudo
+    FROM videos v 
+    JOIN users u ON v.user_id = u.id 
+    ORDER BY RAND()
+");
+
+$videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<!DOCTYPE html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>UniTok</title>
     <style>
+        body {
+            background: #111;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
         .feed-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 40px;
+            padding-bottom: 40px;
         }
 
         .video-card {
@@ -20,7 +43,7 @@
             overflow: hidden;
             border-radius: 15px;
             background: #000;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
         }
 
         .video-card video {
@@ -43,8 +66,13 @@
         }
 
         .video-info p {
-            margin: 0;
+            margin: 2px 0;
             font-size: 14px;
+        }
+
+        .video-info small {
+            font-size: 12px;
+            color: #ccc;
         }
 
         .video-actions {
@@ -58,7 +86,7 @@
         }
 
         .video-actions button {
-            background: white;
+            background: rgb(89, 89, 243);
             border: none;
             border-radius: 50%;
             width: 50px;
@@ -67,35 +95,48 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
         }
 
         .video-actions button:hover {
             background-color: #0d6efd;
             color: white;
         }
+
+        .text-center {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .text-primary {
+            color: #0d6efd;
+        }
+
+        .text-secondary {
+            color: #aaa;
+        }
     </style>
 </head>
-
 <body>
-    <?php include 'config.php'; ?>
-    <?php include 'includes/header.php'; ?>
 
-    
+<div class="text-center mb-4">
+    <h1 class="fw-bold text-primary">🎬 Bienvenue sur UniTok</h1>
+    <p class="text-secondary">Découvre les vidéos des étudiants de SONOU</p>
+</div>
 
-    <div class="text-center mb-4">
-        <h1 class="fw-bold text-primary">🎬 Bienvenue sur UniTok</h1>
-        <p class="text-secondary">Découvre les vidéos des étudiants de SONOU</p>
-    </div>
-
-    <div class="feed-container">
-        <!-- Vidéo 1 -->
+<div class="feed-container">
+    <?php foreach ($videos as $video): ?>
         <div class="video-card">
-            <video autoplay loop muted controls>
-                <source src="assets/videos/exemple1.mp4" type="video/mp4">
+            <video autoplay controls>
+                <source src="<?= htmlspecialchars($video['fichier']) ?>" type="video/mp4">
+                Votre navigateur ne supporte pas la lecture vidéo.
             </video>
             <div class="video-info">
-                <h5>@etudiant1</h5>
-                <p>Présentation de l’université</p>
+                <h5>@<?= htmlspecialchars($video['pseudo']) ?></h5>
+                <p><?= htmlspecialchars($video['titre']) ?></p>
+                <?php if($video['description']): ?>
+                    <small><?= htmlspecialchars($video['description']) ?></small>
+                <?php endif; ?>
             </div>
             <div class="video-actions">
                 <button title="J’aime ❤️">❤️</button>
@@ -103,42 +144,10 @@
                 <button title="Partager 🔁">🔁</button>
             </div>
         </div>
+    <?php endforeach; ?>
+</div>
 
-        <!-- Vidéo 2 -->
-        <div class="video-card">
-            <video autoplay loop muted controls>
-                <source src="assets/videos/exemple2.mp4" type="video/mp4">
-            </video>
-            <div class="video-info">
-                <h5>@etudiante2</h5>
-                <p>Vie sociale à SONOU</p>
-            </div>
-            <div class="video-actions">
-                <button title="J’aime ❤️">❤️</button>
-                <button title="Commentaire 💬">💬</button>
-                <button title="Partager 🔁">🔁</button>
-            </div>
-        </div>
-
-        <!-- Vidéo 3 -->
-        <div class="video-card">
-            <video autoplay loop muted controls>
-                <source src="assets/videos/exemple3.mp4" type="video/mp4">
-            </video>
-            <div class="video-info">
-                <h5>@tuteurSONOU</h5>
-                <p>Comment gérer son temps ?</p>
-            </div>
-            <div class="video-actions">
-                <button title="J’aime ❤️">❤️</button>
-                <button title="Commentaire 💬">💬</button>
-                <button title="Partager 🔁">🔁</button>
-            </div>
-        </div>
-    </div>
-
-    <?php include 'includes/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>
 
 </body>
-
 </html>
