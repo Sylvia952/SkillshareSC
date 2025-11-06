@@ -1,7 +1,9 @@
 <?php
 // inscription.php - Gestion de l'inscription utilisateur (Utilise $_POST / FORM-DATA)
 
-require 'config.php'; // Votre connexion PDO
+// ASSUREZ-VOUS QUE 'config.php' est au même niveau que ce fichier ou que le chemin est correct.
+require 'config.php'; 
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -18,10 +20,9 @@ if (!isset(
     $_POST['email'], $_POST['password'], $_POST['username']
 )) {
     http_response_code(400);
-    // Le message indique au développeur de vérifier le format d'envoi.
     die(json_encode([
         'success' => false,
-        'message' => 'Des données d\'inscription critiques sont manquantes. (Vérifiez si l\'envoi est bien en FORM-DATA)'
+        'message' => 'Des données d\'inscription critiques sont manquantes. L\'envoi doit être en FORM-DATA.'
     ]));
 }
 
@@ -34,7 +35,7 @@ $email = trim($_POST['email']);
 $password = $_POST['password']; 
 $username = trim($_POST['username']);
 
-// Les champs optionnels ne sont pas envoyés par notre test actuel, mais on les prépare
+// Les champs optionnels (laisser null s'ils ne sont pas envoyés)
 $photoUrl = null; 
 $bio = null;
 
@@ -42,22 +43,7 @@ $bio = null;
 $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
 try {
-    // 4. VÉRIFICATION DES DOUBLONS (Email ou Matricule) - CRITIQUE POUR LA VÉRIFICATION UNI.)
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*) FROM users 
-        WHERE email = :email OR matricule_number = :matricule OR username = :username
-    ");
-    $stmt->execute(['email' => $email, 'matricule' => $matricule, 'username' => $username]);
-    if ($stmt->fetchColumn() > 0) {
-        http_response_code(409); // Conflict
-        die(json_encode([
-            'success' => false,
-            'message' => "Erreur: Le matricule, l'email ou le nom d'utilisateur est déjà enregistré."
-        ]));
-    }
-
-
-    // 5. PRÉPARATION et EXÉCUTION de la requête INSERT
+    // 4. PRÉPARATION et EXÉCUTION de la requête INSERT (Méthode directe)
     $stmt = $pdo->prepare("
         INSERT INTO users (
             matricule_number, last_name, first_name, filiere,
@@ -89,10 +75,20 @@ try {
     ]);
     
 } catch (PDOException $e) {
-    http_response_code(500);
+    // Gestion des erreurs
+    if ($e->getCode() === '23000') { 
+        // 23000 est l'erreur pour violation de clé UNIQUE (doublon)
+        http_response_code(409); // Conflit
+        $message = "Erreur: Le matricule, l'email ou le nom d'utilisateur est déjà enregistré.";
+    } else {
+        http_response_code(500);
+        // Afficher l'erreur exacte pour le débug si ce n'est pas un doublon
+        $message = "Erreur serveur : " . $e->getMessage(); 
+    }
+    
     echo json_encode([
         'success' => false,
-        'message' => "Erreur serveur inattendue : " . $e->getMessage()
+        'message' => $message
     ]);
 }
 ?>
