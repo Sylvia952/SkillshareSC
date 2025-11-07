@@ -93,8 +93,8 @@ $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- Reactions statiques -->
             <div class="ut-feed-reactions">
-                <span>👍 0</span>
-                <span>❤️ 0</span>
+                <span>👍 5</span>
+                <span>❤️ 15</span>
                 <span>😮 0</span>
                 <span>😂 0</span>
             </div>
