@@ -17,7 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container">
-    <a class="navbar-brand fw-bold text-light" href="index.php">🎓 UniTok</a>
+    <a class="navbar-brand fw-bold text-light" href="index.php">🎓 Skillshare</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
