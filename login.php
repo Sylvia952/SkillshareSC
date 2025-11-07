@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="col-md-5">
     <div class="card shadow-sm border-0">
       <div class="card-body">
-        <h3 class="text-center text-primary fw-bold mb-4">Connexion à UniTok 🎓</h3>
+        <h3 class="text-center text-primary fw-bold mb-4">Connexion à Skillshare 🎓</h3>
 
         <?php if (isset($error)): ?>
           <div class="alert alert-danger"><?= $error ?></div>

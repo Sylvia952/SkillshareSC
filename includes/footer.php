@@ -2,7 +2,7 @@
 
 <footer class="bg-light text-center py-3 mt-5 border-top">
   <p class="mb-0 text-secondary">
-    &copy; <?= date('Y') ?> UniTok — Plateforme étudiante SONOU.
+    &copy; <?= date('Y') ?> Skillshare — Plateforme étudiante SONOU.
   </p>
 </footer>
 
