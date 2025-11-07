@@ -122,7 +122,12 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li>
                   <hr class="dropdown-divider">
                 </li>
-                <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+                <li>
+                  <a href="#" class="dropdown-item text-danger" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                  </a>
+                </li>
+
               </ul>
             </li>
 
@@ -136,3 +141,25 @@ if (session_status() === PHP_SESSION_NONE) {
   </nav>
 
   <main class="container my-4">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+document.getElementById('logoutBtn').addEventListener('click', function(e) {
+    e.preventDefault(); // Empêche le lien de se déclencher directement
+    Swal.fire({
+        title: 'Êtes-vous sûr ?',
+        text: "Vous allez être déconnecté !",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Oui, me déconnecter',
+        cancelButtonText: 'Annuler'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Redirige vers logout.php
+            window.location.href = 'logout.php';
+        }
+    });
+});
+</script>
