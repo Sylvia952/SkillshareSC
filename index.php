@@ -187,7 +187,7 @@ $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <div class="intro">
-  <h1 class="fw-bold text-primary"><i class="bi bi-camera-reels-fill"></i> Bienvenue sur UniTok</h1>
+  <h1 class="fw-bold text-primary"><i class="bi bi-camera-reels-fill"></i> Bienvenue sur Skillshare</h1>
   <p class="text-secondary">Découvre et partage les vidéos inspirantes des étudiants de SONOU 🎓</p>
 </div>
 
