@@ -1,5 +1,5 @@
 <?php
-//session_start(); 
+session_start(); 
 // Inclure la configuration de la base de données
 include 'config.php';
 
