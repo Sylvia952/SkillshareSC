@@ -1,6 +1,6 @@
 <?php
+//session_start();
 include 'config.php';
-session_start();
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['user_id'])) {
