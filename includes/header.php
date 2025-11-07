@@ -98,7 +98,7 @@ if (session_status() === PHP_SESSION_NONE) {
           <!-- Dropdown Profil -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle profile-btn" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="assets/img/users/<?php echo $_SESSION['user_avatar'] ?? 'default.png'; ?>" alt="profil">
+              <img src="assets\videos\img\default.png" alt="profil">
               <span><?php echo $_SESSION['user_name'] ?? 'Moi'; ?></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
