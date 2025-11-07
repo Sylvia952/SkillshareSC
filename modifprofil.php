@@ -1,11 +1,11 @@
 <?php
+session_start(); 
 // Inclure la configuration de la base de données
 include 'config.php';
 
 // --- VÉRIFICATION DE LA CONNEXION ET SÉCURITÉ ---
 // NOTE : Il est CRUCIAL de vérifier la session !
 // Si vous n'utilisez pas de système de session, ce code DOIT être adapté.
-session_start(); 
 
 // Si l'utilisateur n'est pas connecté, le rediriger vers la page de connexion
 if (!isset($_SESSION['user_id'])) {
