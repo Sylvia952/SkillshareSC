@@ -76,19 +76,18 @@ $is_my_profile = ($profile_id === $_SESSION['user_id']);
                     <p class="text-muted"><?= htmlspecialchars($user['email']) ?></p>
 
                     
-                    <?php if ($is_my_profile): ?>
-                        <a href="modifprofil.php?id=<?= $profile_id ?>" class="btn btn-warning mb-2">
-                            Modifier mon Profil
-                        </a>
-                        <a href="logout.php" class="btn btn-danger btn-sm">Se déconnecter</a>
-                    <?php else: ?>
-                        <p id="subscribers-count"><strong><?= $subscribers_count ?></strong> abonnés</p>
-                        <button id="subscribe-btn" 
-                                data-subscriber="<?= $_SESSION['user_id'] ?>" 
-                                data-target="<?= $profile_id ?>">Chargement...</button>
-                    <?php endif; ?>
+        <?php if ($profile_id === $_SESSION['user_id']): ?>
+            <a href="modifier_profil.php?id=<?= $profile_id ?>" class="btn btn-warning mb-2"> Modifier mon Profil</a>
+            <a href="logout.php" class="btn btn-danger btn-sm">Se déconnecter</a>
+        <?php else: ?>
+                 <p id="subscribers-count"><strong><?= $subscribers_count ?></strong>S'abonnés</p>
+            <button id="subscribe-btn" 
+            data-subscriber="<?= $_SESSION['user_id'] ?>" 
+            data-target="<?= $profile_id ?>">Chargement...</button>
+        <?php endif; ?>
 
-                </div> </div>
+                </div> 
+              </div>
 
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
