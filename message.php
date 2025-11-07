@@ -75,7 +75,7 @@ if ($amis_id) {
                     <li>Aucun ami pour le moment.</li>
                 <?php else: ?>
                     <?php foreach ($amis as $ami): ?>
-                        <li onclick="window.location.href='messagerie.php?ami_id=<?php echo intval($ami['id']); ?>'">
+                        <li onclick="window.location.href='message.php?ami_id=<?php echo intval($ami['id']); ?>'">
                             <?php echo htmlspecialchars($ami['username'], ENT_QUOTES, 'UTF-8'); ?>
                         </li>
                     <?php endforeach; ?>
