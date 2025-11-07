@@ -1,70 +1,53 @@
 <?php
-// login.php
+// index.php (Ancien login.php) - Gère la connexion utilisateur
 
-// Inclure la configuration de la base de données
+// S'assurer que le chemin vers config.php est correct (ex: require 'config.php';)
 require 'config.php'; 
 
-// Définir le header pour les réponses JSON (API RESTful)
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // IMPORTANT pour les tests React
+header('Access-Control-Allow-Origin: *'); 
 
-// Récupérer et décoder les données JSON (attendu de React)
-$data = json_decode(file_get_contents("php://input"), true);
-
-// Vérification des champs requis
-if (!isset($data['email'], $data['password'])) {
-    http_response_code(400); 
+// VÉRIFICATION CRITIQUE : Si la connexion a échoué dans config.php, on arrête ici.
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    http_response_code(500);
     die(json_encode([
         'success' => false,
-        'message' => 'Email ou mot de passe manquant.'
+        'message' => 'Erreur de configuration interne: La connexion à la DB ($pdo) a échoué. Vérifiez config.php.'
     ]));
 }
 
-$email = trim($data['email']);
-$password = $data['password'];
+// 1. UTILISE $_POST POUR LIRE LE FORM-DATA (pour la connexion)
+if (!isset($_POST['email'], $_POST['password'])) {
+    http_response_code(400);
+    die(json_encode(['success' => false, 'message' => 'Email ou mot de passe manquant.']));
+}
+
+$email = trim($_POST['email']);
+$password = $_POST['password'];
 
 try {
-    // 1. CHERCHER L'UTILISATEUR PAR EMAIL
-    $stmt = $pdo->prepare("
-        SELECT user_id, password_hash, username 
-        FROM users 
-        WHERE email = :email
-    ");
+    // 2. RÉCUPÉRATION DU HACHAGE DU MOT DE PASSE ET DE L'UTILISATEUR
+    $stmt = $pdo->prepare("SELECT user_id, password_hash, username FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $stmt->fetch();
 
-    // 2. VÉRIFIER L'EXISTENCE ET LE MOT DE PASSE
     if ($user && password_verify($password, $user['password_hash'])) {
-        
-        // 3. SUCCÈS : L'utilisateur est authentifié
-        
-        // --- SIMULATION JWT ---
-        // En vrai, un JWT serait généré ici. Pour le MVP, on renvoie l'ID.
-        $user_id = $user['user_id'];
-        
-        http_response_code(200); // OK
+        // 3. SUCCÈS : CONNEXION RÉUSSIE
+        http_response_code(200);
         echo json_encode([
             'success' => true,
             'message' => 'Connexion réussie!',
-            'user_id' => $user_id, // L'ID pour identifier l'utilisateur
-            'username' => $user['username'],
-            'token_simule' => base64_encode($user_id . ':' . time()) // Un token simple pour la démo
+            'user_id' => $user['user_id'],
+            'username' => $user['username']
         ]);
-
     } else {
-        // 4. ÉCHEC : Email non trouvé ou mot de passe incorrect
-        http_response_code(401); // Non autorisé
-        echo json_encode([
-            'success' => false,
-            'message' => 'Email ou mot de passe incorrect.'
-        ]);
+        // 4. ÉCHEC : AUCUN UTILISATEUR TROUVÉ OU MOT DE PASSE INCORRECT
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Identifiants invalides.']);
     }
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => "Erreur serveur lors de la connexion."
-    ]);
+    echo json_encode(['success' => false, 'message' => "Erreur de base de données : " . $e->getMessage()]);
 }
 ?>
