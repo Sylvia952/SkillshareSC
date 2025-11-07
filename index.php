@@ -120,8 +120,8 @@ $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <body>
 
 <div class="text-center mb-4">
-    <h1 class="fw-bold text-primary">🎬 Bienvenue sur UniTok</h1>
-    <p class="text-secondary">Découvre les vidéos des étudiants de SONOU</p>
+    <h1 class="fw-bold text-primary">🎬 Bienvenue sur Skillshare</h1>
+    <p class="text-secondary">Découvre l'univers LES COURS SONOU</p>
 </div>
 
 <div class="feed-container">
