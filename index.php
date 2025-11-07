@@ -216,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     /* --- Boutons d'action --- */
     .video-actions {
       position: absolute;
-      right: 15px;
+      right: 15px;        
       bottom: 110px;
       display: flex;
       flex-direction: column;
