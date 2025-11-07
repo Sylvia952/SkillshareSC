@@ -92,7 +92,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <li class="nav-item"><a href="education.php" class="nav-link"><i class="bi bi-journal-bookmark-fill"></i> Éducation</a></li>
 
         <?php if(isset($_SESSION['user_id'])): ?>
-          <li class="nav-item"><a href="upload.php" class="nav-link"><i class="bi bi-cloud-arrow-up-fill"></i> Publier</a></li>
+          <li class="nav-item"><a href="video.php" class="nav-link"><i class="bi bi-cloud-arrow-up-fill"></i> Publier</a></li>
           <li class="nav-item"><a href="lives.php" class="nav-link"><i class="bi bi-broadcast-pin"></i> Lives</a></li>
 
           <!-- Dropdown Profil -->
