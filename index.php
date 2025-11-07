@@ -2,229 +2,396 @@
 include 'config.php';
 include 'includes/header.php';
 
-// Récupérer toutes les vidéos avec le pseudo utilisateur
+// Récupérer toutes les vidéos avec le pseudo utilisateur ET le nombre de commentaires
 $stmt = $pdo->query("
-    SELECT v.*, u.last_name AS pseudo
+    SELECT v.*, 
+           u.last_name AS pseudo, 
+           u.id AS user_id,
+           u.profile_picture_url,
+           COUNT(c.id) AS comment_count
     FROM videos v 
     JOIN users u ON v.user_id = u.id 
-    ORDER BY RAND()
+    LEFT JOIN comments c ON v.id = c.video_id
+    GROUP BY v.id
+    ORDER BY v.id DESC
+    LIMIT 20
 ");
-
 $videos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Traitement AJAX des likes
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    header('Content-Type: application/json');
+
+    if ($_POST['action'] === 'like') {
+        $video_id = intval($_POST['video_id']);
+        $stmt = $pdo->prepare("UPDATE videos SET likes = COALESCE(likes,0)+1 WHERE id = ?");
+        $stmt->execute([$video_id]);
+        $stmt = $pdo->prepare("SELECT likes FROM videos WHERE id = ?");
+        $stmt->execute([$video_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo json_encode(['success' => true, 'likes' => $result['likes']]);
+        exit;
+    }
+
+    if ($_POST['action'] === 'comment_like') {
+        $comment_id = intval($_POST['comment_id']);
+        $stmt = $pdo->prepare("UPDATE comments SET likes = COALESCE(likes,0)+1 WHERE id = ?");
+        $stmt->execute([$comment_id]);
+        $stmt = $pdo->prepare("SELECT likes FROM comments WHERE id = ?");
+        $stmt->execute([$comment_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        echo json_encode(['success' => true, 'likes' => $result['likes']]);
+        exit;
+    }
+
+    if ($_POST['action'] === 'comment' && isset($_POST['video_id'], $_POST['comment'])) {
+        $video_id = intval($_POST['video_id']);
+        $comment = htmlspecialchars(trim($_POST['comment']));
+        $stmt = $pdo->prepare("INSERT INTO comments (video_id, user_id, comment, created_at, likes) VALUES (?, ?, ?, NOW(), 0)");
+        // Ici, user_id du commentateur : à ajuster selon ta logique de session
+        $user_id = 1; // temporaire si pas de session
+        $stmt->execute([$video_id, $user_id, $comment]);
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit;
+    }
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UniTok - Découvre les vidéos étudiantes</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniTok - Découvre les vidéos étudiantes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            font-family: "Poppins", sans-serif;
+        }
 
-  <!-- Bootstrap & Icons -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+        .video-card {
+            position: relative;
+            width: 400px;
+            margin: 30px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #111;
+        }
 
-  <style>
-    /* --- Style global --- */
-    body {
-      background: radial-gradient(circle at top, #0d1117, #000);
-      color: #fff;
-      font-family: "Poppins", Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      overflow-x: hidden;
-    }
+        .video-card video {
+            width: 400px;
+            height: 700px;
+            border-radius: 15px;
+        }
 
-    h1, h5, p {
-      margin: 0;
-    }
+        .video-info {
+            position: absolute;
+            bottom: 20px;
+            left: 15px;
+            z-index: 2;
+            color: #fff;
+            text-shadow: 1px 1px 5px #000;
+        }
 
-    .text-primary {
-      color: #00b894 !important;
-    }
+        .video-actions {
+            position: absolute;
+            right: 15px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
 
-    .text-secondary {
-      color: #aaa;
-    }
+        .tiktok-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+        }
 
-    /* --- Section d'en-tête --- */
-    .intro {
-      text-align: center;
-      margin-top: 40px;
-      margin-bottom: 30px;
-    }
+        .tiktok-btn:hover {
+            transform: scale(1.1);
+        }
 
-    .intro h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
+        .action-count {
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+        }
 
-    .intro p {
-      font-size: 1rem;
-      color: #ccc;
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
 
-    /* --- Feed TikTok --- */
-    .feed-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 60px;
-      padding-bottom: 60px;
-    }
+        .modal-content {
+            background: #000;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .video-card {
-      position: relative;
-      width: 400px;
-      height: 700px;
-      overflow: hidden;
-      border-radius: 20px;
-      background: #000;
-      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.6);
-      transition: all 0.3s ease;
-    }
+        .modal-header {
+            padding: 15px;
+            border-bottom: 1px solid #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+        }
 
-    .video-card:hover {
-      transform: scale(1.02);
-      box-shadow: 0 8px 30px rgba(0, 255, 150, 0.25);
-    }
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+        }
 
-    .video-card video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 20px;
-    }
+        .comments-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
 
-    /* --- Infos vidéo --- */
-    .video-info {
-      position: absolute;
-      bottom: 25px;
-      left: 15px;
-      color: white;
-      text-shadow: 1px 1px 5px rgba(0,0,0,0.8);
-      width: calc(100% - 80px);
-    }
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #222;
+        }
 
-    .video-info h5 {
-      font-size: 18px;
-      font-weight: 600;
-    }
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
 
-    .video-info p {
-      font-size: 14px;
-      margin-top: 3px;
-    }
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .video-info small {
-      font-size: 12px;
-      color: #ccc;
-    }
+        .comment-content {
+            flex: 1;
+        }
 
-    /* --- Avatar utilisateur --- */
-    .user-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #00b894;
-      margin-right: 8px;
-    }
+        .comment-author {
+            font-weight: bold;
+            color: #fff;
+        }
 
-    .user-info {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-    }
+        .comment-text {
+            color: #fff;
+        }
 
-    /* --- Boutons d'action --- */
-    .video-actions {
-      position: absolute;
-      right: 15px;
-      bottom: 110px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
-    }
+        .comment-like-btn {
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .action-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #fff;
-      font-size: 22px;
-      transition: 0.3s ease;
-    }
+        .comment-like-btn.liked {
+            color: #ff4757;
+        }
 
-    .action-btn:hover {
-      background: #00b894;
-      transform: scale(1.1);
-    }
+        .comment-form-container {
+            padding: 10px;
+            border-top: 1px solid #222;
+        }
 
-    .likes-count, .comments-count {
-      font-size: 13px;
-      margin-top: 5px;
-      color: #ccc;
-    }
+        .comment-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 25px;
+            background: #333;
+            border: none;
+            color: #fff;
+            resize: none;
+        }
 
-    @media screen and (max-width: 600px) {
-      .video-card {
-        width: 90%;
-        height: 600px;
-      }
-    }
-  </style>
+        .submit-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            background: #00b894;
+            color: #fff;
+            border: none;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="intro">
-  <h1 class="fw-bold text-primary"><i class="bi bi-camera-reels-fill"></i> Bienvenue sur UniTok</h1>
-  <p class="text-secondary">Découvre et partage les vidéos inspirantes des étudiants de SONOU 🎓</p>
-</div>
-
-<div class="feed-container">
-  <?php foreach ($videos as $video): ?>
-    <div class="video-card">
-      <video autoplay muted loop controls>
-        <source src="<?= htmlspecialchars($video['fichier']) ?>" type="video/mp4">
-        Votre navigateur ne supporte pas la lecture vidéo.
-      </video>
-
-      <div class="video-info">
-        <div class="user-info">
-         <img src="assets\videos\img\default.png" alt="Avatar" class="user-avatar">
-
-          <h5>@<?= htmlspecialchars($video['pseudo']) ?></h5>
-        </div>
-        <p><?= htmlspecialchars($video['titre']) ?></p>
-        <?php if($video['description']): ?>
-          <small><?= htmlspecialchars($video['description']) ?></small>
-        <?php endif; ?>
-      </div>
-
-      <div class="video-actions">
-        <button class="action-btn" title="J’aime"><i class="bi bi-heart-fill text-danger"></i></button>
-        <span class="likes-count">123</span>
-
-        <button class="action-btn" title="Commenter"><i class="bi bi-chat-dots-fill"></i></button>
-        <span class="comments-count">45</span>
-
-        <button class="action-btn" title="Partager"><i class="bi bi-share-fill"></i></button>
-      </div>
+    <div class="text-center my-4">
+        <h1 class="text-primary"><i class="bi bi-camera-reels-fill"></i> UniTok</h1>
+        <p>Découvre et partage les vidéos étudiantes 🎓</p>
     </div>
-  <?php endforeach; ?>
-</div>
 
-<?php include 'includes/footer.php'; ?>
+    <?php foreach ($videos as $video): ?>
+        <div class="video-card">
+            <video controls>
+                <source src="<?= htmlspecialchars($video['fichier']) ?>" type="video/mp4">
+            </video>
+            <div class="video-info">
+                <h5>@<?= htmlspecialchars($video['pseudo']) ?></h5>
+                <p><?= htmlspecialchars($video['titre']) ?></p>
+                <?php if ($video['description']): ?>
+                    <small><?= htmlspecialchars($video['description']) ?></small>
+                <?php endif; ?>
+            </div>
+            <div class="video-actions">
+                <div class="text-center">
+                    <button class="tiktok-btn" onclick="likeVideo(<?= $video['id'] ?>, this)">❤️</button>
+                    <div class="action-count" id="like-count-<?= $video['id'] ?>"><?= $video['likes'] ?? 0 ?></div>
+                </div>
+                <div class="text-center">
+                    <button class="tiktok-btn" onclick="openCommentModal(<?= $video['id'] ?>)">💬</button>
+                    <div class="action-count" id="comment-count-<?= $video['id'] ?>"><?= $video['comment_count'] ?? 0 ?></div>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
 
+    <!-- Modal Commentaires -->
+    <div id="commentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>Commentaires</div>
+                <button class="close-btn" onclick="closeCommentModal()">&times;</button>
+            </div>
+            <div class="comments-list" id="commentsList">
+                <div class="text-center text-secondary py-4">Chargement...</div>
+            </div>
+            <div class="comment-form-container">
+                <form id="commentForm" onsubmit="submitComment(event)">
+                    <input type="hidden" name="action" value="comment">
+                    <input type="hidden" name="video_id" id="commentVideoId">
+                    <div class="d-flex gap-2">
+                        <textarea name="comment" class="comment-input" placeholder="Écris un commentaire..." rows="1" required></textarea>
+                        <button class="submit-btn">Publier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function likeVideo(videoId, btn) {
+            const form = new FormData();
+            form.append('action', 'like');
+            form.append('video_id', videoId);
+            const resp = await fetch('', {
+                method: 'POST',
+                body: form
+            });
+            const res = await resp.json();
+            if (res.success) {
+                document.getElementById('like-count-' + videoId).textContent = res.likes;
+                btn.classList.add('liked');
+            }
+        }
+
+        function openCommentModal(videoId) {
+            document.getElementById('commentVideoId').value = videoId;
+            document.getElementById('commentModal').style.display = 'flex';
+            loadComments(videoId);
+        }
+
+        function closeCommentModal() {
+            document.getElementById('commentModal').style.display = 'none';
+        }
+
+        async function loadComments(videoId) {
+            const res = await fetch(`get_comments.php?video_id=${videoId}`);
+            const comments = await res.json();
+            const list = document.getElementById('commentsList');
+            list.innerHTML = '';
+            if (comments.length === 0) {
+                list.innerHTML = '<div class="text-center text-secondary py-4">Aucun commentaire</div>';
+                return;
+            }
+            comments.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                div.innerHTML = `<div class="comment-avatar">${c.profile_picture_url?'<img src="'+c.profile_picture_url+'">':'<span>'+c.pseudo[0].toUpperCase()+'</span>'}</div>
+        <div class="comment-content"><div class="comment-author">@${c.pseudo}</div><div class="comment-text">${c.comment}</div>
+        <div class="comment-like-btn" onclick="likeComment(${c.id}, this)">❤️ <span>${c.likes}</span></div></div>`;
+                list.appendChild(div);
+            });
+        }
+
+        async function likeComment(commentId, btn) {
+            const form = new FormData();
+            form.append('action', 'comment_like');
+            form.append('comment_id', commentId);
+            const resp = await fetch('', {
+                method: 'POST',
+                body: form
+            });
+            const res = await resp.json();
+            if (res.success) {
+                btn.querySelector('span').textContent = res.likes;
+                btn.classList.add('liked');
+            }
+        }
+
+        async function submitComment(e) {
+            e.preventDefault();
+            const form = document.getElementById('commentForm');
+            const fd = new FormData(form);
+            const resp = await fetch('', {
+                method: 'POST',
+                body: fd
+            });
+            if (resp.ok) {
+                loadComments(document.getElementById('commentVideoId').value);
+                form.querySelector('textarea').value = '';
+                const countElem = document.getElementById('comment-count-' + document.getElementById('commentVideoId').value);
+                countElem.textContent = parseInt(countElem.textContent) + 1;
+            }
+        }
+
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('commentModal')) closeCommentModal();
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCommentModal();
+            }
+        });
+    </script>
+
+    <?php include 'includes/footer.php'; ?>
 </body>
+
 </html>
