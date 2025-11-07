@@ -90,7 +90,7 @@ if (session_status() === PHP_SESSION_NONE) {
   <nav class="navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand text-light" href="index.php">
-        <i class="bi bi-mortarboard-fill"></i> UniTok
+        <i class="bi bi-mortarboard-fill"></i> Skillshare
       </a>
       <button class="navbar-toggler text-light" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <i class="bi bi-list fs-2"></i>

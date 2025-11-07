@@ -253,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 <body>
 
     <div class="text-center my-4">
-        <h1 class="text-primary"><i class="bi bi-camera-reels-fill"></i> UniTok</h1>
+        <h1 class="text-primary"><i class="bi bi-camera-reels-fill"></i> Skillshare</h1>
         <p>Découvre et partage les vidéos étudiantes 🎓</p>
     </div>
 
